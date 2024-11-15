@@ -1,4 +1,5 @@
 const std = @import("std");
+const ArrayList = std.ArrayList;
 const assert = std.debug.assert;
 
 const glfw = @import("../../c.zig");
@@ -33,20 +34,24 @@ pub fn windowClosed() bool {
     return glfw.glfwWindowShouldClose(window) == glfw.GLFW_TRUE;
 }
 
+pub fn getWindowPtr() *anyopaque {
+    assert(window != null);
+    return @ptrCast(window);
+}
+
 pub fn update() void {
     assert(window != null);
 
     glfw.glfwPollEvents();
 }
 
-pub fn getVulkanExtensions(allocator: std.mem.Allocator) std.ArrayList {
+pub fn getVulkanExtensions(exts_list: *ArrayList([*:0]const u8)) !void {
     assert(window != null);
 
     var vk_exts_count: u32 = 0;
     const vk_exts = glfw.glfwGetRequiredInstanceExtensions(&vk_exts_count);
 
-    var vk_exts_list = try std.ArrayList([*:0]const u8).initCapacity(allocator, vk_exts_count);
     for (0..vk_exts_count) |i| {
-        try vk_exts_list.append(vk_exts[i]);
+        try exts_list.append(vk_exts[i]);
     }
 }

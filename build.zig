@@ -4,6 +4,16 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
+    // Setup vulkan-zig generator and module.
+    const registry = b.dependency("vulkan_headers", .{}).path("registry/vk.xml");
+    const vk_gen = b.dependency("vulkan_zig", .{}).artifact("vulkan-zig-generator");
+    const vk_generate_cmd = b.addRunArtifact(vk_gen);
+    vk_generate_cmd.addFileArg(registry);
+
+    const vulkan_zig = b.addModule("vulkan-zig", .{
+        .root_source_file = vk_generate_cmd.addOutputFileArg("vk.zig"),
+    });
+
     const core = b.addStaticLibrary(.{
         .name = "core",
         .root_source_file = b.path("src/core.zig"),
@@ -11,7 +21,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     core.linkSystemLibrary("glfw3");
-    //b.installArtifact(core);
+    core.root_module.addImport("vulkan", vulkan_zig);
 
     const test_bed = b.addExecutable(.{
         .name = "testbed",

@@ -3,6 +3,8 @@ const c = @cImport({
     @cInclude("GLFW/glfw3.h");
 });
 
+const vk = @import("vulkan");
+
 // Re-export the GLFW things that we need
 pub const GLFW_TRUE = c.GLFW_TRUE;
 pub const GLFW_FALSE = c.GLFW_FALSE;
@@ -21,3 +23,7 @@ pub const glfwWindowShouldClose = c.glfwWindowShouldClose;
 pub const glfwGetRequiredInstanceExtensions = c.glfwGetRequiredInstanceExtensions;
 pub const glfwGetFramebufferSize = c.glfwGetFramebufferSize;
 pub const glfwPollEvents = c.glfwPollEvents;
+
+pub extern fn glfwGetInstanceProcAddress(instance: vk.Instance, procname: [*:0]const u8) vk.PfnVoidFunction;
+pub extern fn glfwGetPhysicalDevicePresentationSupport(instance: vk.Instance, pdev: vk.PhysicalDevice, queuefamily: u32) c_int;
+pub extern fn glfwCreateWindowSurface(instance: vk.Instance, window: *GLFWwindow, allocation_callbacks: ?*const vk.AllocationCallbacks, surface: *vk.SurfaceKHR) vk.Result;
